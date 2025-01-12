@@ -4,14 +4,14 @@ from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropou
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import os
 
-# Paths to your reduced dataset
+# Paths to your dataset
 train_dir = "Path_To_Dataset_Train_directory"
 test_dir = "Path_To_Dataset_Test_directory"
 
 # Parameters
 batch_size = 32
-img_height, img_width = 64, 64  # Resize all images to this size
-num_classes = len(os.listdir(train_dir))  # Automatically detect number of classes
+img_height, img_width = 64, 64
+num_classes = len(os.listdir(train_dir))
 
 # Data Preprocessing
 train_datagen = ImageDataGenerator(
@@ -21,7 +21,7 @@ train_datagen = ImageDataGenerator(
     height_shift_range=0.1,
     shear_range=0.2,
     zoom_range=0.2,
-    horizontal_flip=False,  # Traffic signs and arrows should not flip horizontally
+    horizontal_flip=False,
     fill_mode="nearest"
 )
 
@@ -52,7 +52,7 @@ model = Sequential([
     Flatten(),
     Dense(256, activation="relu"),
     Dropout(0.5),
-    Dense(num_classes, activation="softmax")  # Adjusts automatically for the new number of classes
+    Dense(num_classes, activation="softmax")
 ])
 
 # Compile the model
@@ -61,7 +61,7 @@ model.compile(optimizer="adam",
               metrics=["accuracy"])
 
 # Train the model
-epochs = 20  # You can adjust if needed
+epochs = 20
 history = model.fit(
     train_generator,
     validation_data=test_generator,

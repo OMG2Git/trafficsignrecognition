@@ -7,37 +7,32 @@ import threading
 import queue
 import time
 
-# Initialize the Roboflow object with your API key
 rf = Roboflow(api_key="YOUR_API_KEY")
 detection_model = rf.workspace("YOUR_WORKSPACE_NAME").project("tabela_v1.2").version(12).model
 
-# Initialize the text-to-speech engine
 tts_engine = pyttsx3.init()
 speaking = threading.Event()
 
 def text_to_speech_worker():
     while True:
         text = tts_queue.get()
-        if text is None:  # Exit condition
+        if text is None:
             break
-        speaking.set()  # Mark speaking as active
+        speaking.set()
         tts_engine.say(text)
         tts_engine.runAndWait()
-        speaking.clear()  # Mark speaking as done
+        speaking.clear()
         tts_queue.task_done()
 
-# Start the text-to-speech thread
 tts_queue = queue.Queue()
 tts_thread = threading.Thread(target=text_to_speech_worker, daemon=True)
 tts_thread.start()
 
-# Function to preprocess the frame (resize and normalize)
 def preprocess_frame(frame):
     frame_resized = cv2.resize(frame, (224, 224))
     frame_normalized = frame_resized / 255.0
     return frame_normalized
 
-# Load the classification model
 classification_model = tf.keras.models.load_model("finetuned_train_v2.keras")
 class_labels = {
     0: "30",
@@ -48,14 +43,12 @@ class_labels = {
     5: "right"
 }
 
-# Connect to DroidCam via USB
 cap = cv2.VideoCapture(1)
 
 if not cap.isOpened():
     print("Error: Could not connect to DroidCam.")
     exit()
 
-# Set resolution
 frame_width = 526
 frame_height = 526
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
@@ -96,17 +89,16 @@ while True:
             continue
 
         # Preprocess the cropped image for classification
-        cropped_img_resized = cv2.resize(cropped_img, (64, 64))  # Resize to match input size (64x64)
-        cropped_img_resized = cv2.cvtColor(cropped_img_resized, cv2.COLOR_BGR2RGB)  # Convert to RGB
-        cropped_img_resized = np.expand_dims(cropped_img_resized, axis=0)  # Add batch dimension
-        cropped_img_resized = cropped_img_resized / 255.0  # Normalize the image
+        cropped_img_resized = cv2.resize(cropped_img, (64, 64))
+        cropped_img_resized = cv2.cvtColor(cropped_img_resized, cv2.COLOR_BGR2RGB)
+        cropped_img_resized = np.expand_dims(cropped_img_resized, axis=0)
+        cropped_img_resized = cropped_img_resized / 255.0
 
         predictions = classification_model.predict(cropped_img_resized)
         predicted_class = np.argmax(predictions)
         confidence = np.max(predictions)
         predicted_label = class_labels[predicted_class]
 
-        # Update latest prediction only if TTS is not speaking
         if not speaking.is_set():
             latest_prediction = f"Predicted traffic sign is {predicted_label}. Confidence is {confidence * 100:.2f} percent."
             tts_queue.put(latest_prediction)
@@ -122,5 +114,5 @@ cap.release()
 cv2.destroyAllWindows()
 
 # Stop the TTS thread
-tts_queue.put(None)  # Signal the thread to exit
+tts_queue.put(None)
 tts_thread.join()

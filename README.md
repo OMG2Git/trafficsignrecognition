@@ -108,7 +108,7 @@ To use the system for real-time prediction, connect your webcam or DroidCam, and
 
 Copy code
 ```bash
-python real_time_prediction.py
+python final.py
 ```
 This will:
 
@@ -139,7 +139,7 @@ To fine-tune a pre-trained model, use the following script:
 
 Copy code
 ```bash
-python fine_tune_model.py
+python finetune.py
 ```
 This will:
 

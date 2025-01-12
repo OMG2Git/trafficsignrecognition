@@ -49,7 +49,7 @@ Also, update the Roboflow workspace and project version in the script as follows
 ```
 Copy code
 ```bash
-detection_model = rf.workspace("om").project("tabela_v1.2").version(12).model
+detection_model = rf.workspace("YOUR_WORKSPACE").project("tabela_v1.2").version(12).model
 ```
 ### 3. Dataset Path
 
